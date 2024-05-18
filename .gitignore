@@ -4,4 +4,5 @@ __pycache__/
 catboost_info/
 
 *.lock
+data/*.npz
 data/Base.csv

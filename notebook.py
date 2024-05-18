@@ -1,23 +1,81 @@
 # %%
+import os
+import warnings
+
+import mlflow
 import numpy as np
 import pandas as pd
-from catboost import CatBoostClassifier
-from lightgbm import LGBMClassifier
-from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import (
-    LabelEncoder,
-    MinMaxScaler,
-    OrdinalEncoder,
-    StandardScaler,
+from crunchy_mining.pipeline import inspect_cv_split_size
+from crunchy_mining.pipeline import inspect_holdout_split_size
+from crunchy_mining.pipeline import intrinsic_catboost
+from crunchy_mining.pipeline import intrinsic_lightgbm
+from crunchy_mining.pipeline import intrinsic_linear
+from crunchy_mining.pipeline import intrinsic_trees
+from crunchy_mining.pipeline import intrinsic_xgboost
+from crunchy_mining.pipeline import pdp
+from crunchy_mining.pipeline import pimp
+from crunchy_mining.pipeline import validate_adaboost
+from crunchy_mining.pipeline import validate_catboost
+from crunchy_mining.pipeline import validate_decision_tree
+from crunchy_mining.pipeline import validate_gaussian_nb
+from crunchy_mining.pipeline import validate_knn
+from crunchy_mining.pipeline import validate_lightgbm
+from crunchy_mining.pipeline import validate_linear_svc
+from crunchy_mining.pipeline import validate_logistic_regression
+from crunchy_mining.pipeline import validate_random_forest
+from crunchy_mining.pipeline import validate_xgboost
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV1
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV2
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV3
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV4
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV5
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV6
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV7
+from crunchy_mining.sampling.samplers import ResamplerV0
+from crunchy_mining.sampling.samplers import ResamplerV1
+from crunchy_mining.sampling.samplers import ResamplerV2
+from crunchy_mining.sampling.samplers import ResamplerV3
+from crunchy_mining.sampling.samplers import ResamplerV4
+from crunchy_mining.sampling.samplers import ResamplerV5
+from crunchy_mining.sampling.samplers import ResamplerV6
+from crunchy_mining.sampling.samplers import ResamplerV7
+from crunchy_mining.sampling.samplers import ResamplerV8
+from crunchy_mining.sampling.samplers import SamplerV1
+from crunchy_mining.sampling.samplers import SamplerV2
+from hydra import compose
+from hydra import initialize
+
+# %load_ext autoreload
+# %autoreload 2
+
+mlflow.set_tracking_uri("http://localhost:5002")
+
+warnings.filterwarnings(
+    action="ignore",
+    message=".*Distutils was imported before Setuptools.*",
 )
-from sklearn.svm import LinearSVC
-from sklearn.tree import DecisionTreeClassifier
-from xgboost import XGBClassifier
+
+warnings.filterwarnings(
+    action="ignore",
+    message=".*Setuptools is replacing distutils.*",
+)
+
+warnings.filterwarnings(
+    action="ignore",
+    message=".*Attempting to set identical low and high xlims.*",
+)
+
+# %%
+experiment = os.environ.get("CM_EXPERIMENT", "sampling_v1")
+
+with initialize(version_base=None, config_path="conf"):
+    cfg = compose(overrides=[f"+experiment={experiment}"])
+
+# %%
+cfg
+
+# %%
+mlflow.set_experiment(cfg.mlflow.experiment_name)
 
 # %%
 df = pd.read_csv("data/Base.csv")
@@ -25,203 +83,252 @@ df = pd.read_csv("data/Base.csv")
 # %%
 df.info()
 
-# %%
-df["fraud_bool"].value_counts()
+# %% [markdown]
+# ## Sample
 
 # %%
-counts = df["fraud_bool"].value_counts()
-majority_class = counts.index[np.argmax(counts)]
-minority_class = counts.index[np.argmin(counts)]
-n_minority_class = np.min(counts)
+match cfg.sampling.variant:
+    case 1:
+        sampler = SamplerV1(cfg)
+    case 2:
+        sampler = SamplerV2(cfg)
 
-df_sampled = pd.concat(
-    [
-        df[df["fraud_bool"] == majority_class].sample(
-            n=n_minority_class,
-            random_state=12345,
-        ),
-        df[df["fraud_bool"] == minority_class],
-    ]
-)
+sampler.sample(df)
+train_val_sets_raw = sampler.train_val_sets
 
 # %%
-variables = {
-    "categorical": [
-        "payment_type",
-        "employment_status",
-        "email_is_free",
-        "housing_status",
-        "phone_home_valid",
-        "phone_mobile_valid",
-        "has_other_cards",
-        "foreign_request",
-        "source",
-        "device_os",
-        "keep_alive_session",
-    ],
-    "numerical": [
-        "income",
-        "name_email_similarity",
-        "prev_address_months_count",
-        "current_address_months_count",
-        "customer_age",
-        "days_since_request",
-        "intended_balcon_amount",
-        "zip_count_4w",
-        "velocity_6h",
-        "velocity_24h",
-        "velocity_4w",
-        "bank_branch_count_8w",
-        "date_of_birth_distinct_emails_4w",
-        "credit_risk_score",
-        "bank_months_count",
-        "proposed_credit_limit",
-        "session_length_in_minutes",
-        "device_distinct_emails_8w",
-        "device_fraud_count",
-        "month",
-    ],
-    "target": "fraud_bool",
-}
+inspect_holdout_split_size(train_val_sets_raw, cfg.vars.stratify)
 
 # %%
-df_train, df_test = train_test_split(
-    df_sampled,
-    test_size=0.15,
-    random_state=12345,
-    stratify=df_sampled[variables["target"]],
-)
+inspect_cv_split_size(train_val_sets_raw, cfg.vars.stratify)
+
+# %% [markdown]
+# ## Modify
+
+# %% [markdown]
+# ### Preprocessing
 
 # %%
-pd.concat(
-    [
-        df_train[variables["target"]].value_counts(),
-        df_test[variables["target"]].value_counts(),
-    ]
-)
+match cfg.preprocessing.variant:
+    case 1:
+        preprocessor = PreprocessorV1(cfg)
+    case 2:
+        preprocessor = PreprocessorV2(cfg)
+    case 3:
+        preprocessor = PreprocessorV3(cfg)
+    case 4:
+        preprocessor = PreprocessorV4(cfg)
+    case 5:
+        preprocessor = PreprocessorV5(cfg)
+    case 6:
+        preprocessor = PreprocessorV6(cfg)
+    case 7:
+        preprocessor = PreprocessorV7(cfg)
+
+for name, (df_train, df_val) in train_val_sets_raw.items():
+    preprocessor.fit(df_train, df_val, name=name)
+
+# "name": (X_train, y_train, X_val, y_val)
+preprocessor.save_train_val_sets()
+preprocessor.save_encoders()
+train_val_sets_pp = preprocessor.get_train_val_sets()
+
+# %% [markdown]
+# ### Resampling
 
 # %%
-df_train_sm, df_val = train_test_split(
-    df_train,
-    test_size=0.15 / 0.85,
-    random_state=12345,
-    stratify=df_train[variables["target"]],
-)
+match cfg.resampling.variant:
+    case 0:
+        resampler = ResamplerV0()
+    case 1:
+        resampler = ResamplerV1()
+    case 2:
+        resampler = ResamplerV2()
+    case 3:
+        resampler = ResamplerV3()
+    case 4:
+        resampler = ResamplerV4()
+    case 5:
+        resampler = ResamplerV5()
+    case 6:
+        resampler = ResamplerV6()
+    case 7:
+        resampler = ResamplerV7()
+    case 8:
+        resampler = ResamplerV8()
+
+# "name": (X_train, y_train, X_val, y_val)
+resampler.sample(train_val_sets_pp)
+train_val_sets = resampler.train_val_sets
+
+# %% [markdown]
+# ## Modeling
+
+# %% [markdown]
+# ### Cross-Validation
 
 # %%
-pd.concat(
-    [
-        df_train_sm[variables["target"]].value_counts(),
-        df_val[variables["target"]].value_counts(),
-    ]
-)
+if cfg.validation.models.knn:
+    validate_knn(cfg, train_val_sets)
 
 # %%
-oe = OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)
-X_train_sm_cat = oe.fit_transform(df_train_sm[variables["categorical"]])
-X_val_cat = oe.transform(df_val[variables["categorical"]])
-X_test_cat = oe.transform(df_test[variables["categorical"]])
+if cfg.validation.models.logistic_regression:
+    validate_logistic_regression(cfg, train_val_sets)
 
 # %%
-mm = MinMaxScaler()
-X_train_sm_cat_scaled = mm.fit_transform(X_train_sm_cat)
-X_val_cat_scaled = mm.transform(X_val_cat)
-X_test_cat_scaled = mm.transform(X_test_cat)
+if cfg.validation.models.gaussian_nb:
+    validate_gaussian_nb(cfg, train_val_sets)
 
 # %%
-ss = StandardScaler()
-X_train_sm_num = ss.fit_transform(df_train_sm[variables["numerical"]])
-X_val_num = ss.transform(df_val[variables["numerical"]])
-X_test_num = ss.transform(df_test[variables["numerical"]])
+if cfg.validation.models.linear_svc:
+    validate_linear_svc(cfg, train_val_sets)
 
 # %%
-X_train_sm_ft = np.hstack((X_train_sm_cat_scaled, X_train_sm_num))
-X_val_ft = np.hstack((X_val_cat_scaled, X_val_num))
-X_test_ft = np.hstack((X_test_cat_scaled, X_test_num))
+if cfg.validation.models.decision_tree:
+    validate_decision_tree(cfg, train_val_sets)
 
 # %%
-y_train_sm = df_train_sm[variables["target"]].to_numpy()
-y_val = df_val[variables["target"]].to_numpy()
-y_test = df_test[variables["target"]].to_numpy()
+if cfg.validation.models.random_forest:
+    validate_random_forest(cfg, train_val_sets)
 
 # %%
-knn = KNeighborsClassifier()
-knn.fit(X_train_sm_ft, y_train_sm)
+if cfg.validation.models.adaboost:
+    validate_adaboost(cfg, train_val_sets)
 
 # %%
-logreg = LogisticRegression(random_state=12345, n_jobs=-1)
-logreg.fit(X_train_sm_ft, y_train_sm)
+if cfg.validation.models.xgboost:
+    validate_xgboost(cfg, train_val_sets)
 
 # %%
-gnb = GaussianNB()
-gnb.fit(X_train_sm_ft, y_train_sm)
+if cfg.validation.models.lightgbm:
+    validate_lightgbm(cfg, train_val_sets)
 
 # %%
-svc = LinearSVC(dual="auto", random_state=12345)
-svc.fit(X_train_sm_ft, y_train_sm)
+if cfg.validation.models.catboost:
+    validate_catboost(cfg, train_val_sets)
+
+# %% [markdown]
+# ## Assess
+
+# %% [markdown]
+# ### Intrinsic Interpretation
 
 # %%
-dt = DecisionTreeClassifier(random_state=12345)
-dt.fit(X_train_sm_ft, y_train_sm)
+if cfg.interpretation.intrinsic.models.logistic_regression:
+    intrinsic_linear(cfg, train_val_sets, model_name="Logistic Regression")
 
 # %%
-ab = AdaBoostClassifier(algorithm="SAMME", random_state=12345)
-ab.fit(X_train_sm_ft, y_train_sm)
+if cfg.interpretation.intrinsic.models.linear_svc:
+    intrinsic_linear(cfg, train_val_sets, model_name="Linear SVC")
 
 # %%
-rf = RandomForestClassifier(n_jobs=-1, random_state=12345)
-rf.fit(X_train_sm_ft, y_train_sm)
+if cfg.interpretation.intrinsic.models.decision_tree:
+    intrinsic_trees(cfg, train_val_sets, model_name="Decision Tree")
 
 # %%
-xgb = XGBClassifier(n_jobs=-1, random_state=12345)
-xgb.fit(X_train_sm_ft, y_train_sm)
+if cfg.interpretation.intrinsic.models.random_forest:
+    intrinsic_trees(cfg, train_val_sets, model_name="Random Forest")
 
 # %%
-lgb = LGBMClassifier(random_state=12345, n_jobs=-1)
-lgb.fit(X_train_sm_ft, y_train_sm)
+if cfg.interpretation.intrinsic.models.adaboost:
+    intrinsic_trees(cfg, train_val_sets, model_name="AdaBoost")
 
 # %%
-catb = CatBoostClassifier(metric_period=250, random_state=12345)
-catb.fit(X_train_sm_ft, y_train_sm)
+if cfg.interpretation.intrinsic.models.xgboost:
+    intrinsic_xgboost(cfg, train_val_sets)
 
 # %%
-y_knn = knn.predict(X_val_ft)
-print(classification_report(y_val, y_knn))
+if cfg.interpretation.intrinsic.models.lightgbm:
+    intrinsic_lightgbm(cfg, train_val_sets)
 
 # %%
-y_logreg = logreg.predict(X_val_ft)
-print(classification_report(y_val, y_logreg))
+if cfg.interpretation.intrinsic.models.catboost:
+    intrinsic_catboost(cfg, train_val_sets)
+
+# %% [markdown]
+# ### Permutation Feature Importance
 
 # %%
-y_gnb = gnb.predict(X_val_ft)
-print(classification_report(y_val, y_gnb))
+if cfg.interpretation.permutation_importance.models.knn:
+    pimp(train_val_sets, model_name="KNN")
 
 # %%
-y_svc = svc.predict(X_val_ft)
-print(classification_report(y_val, y_svc))
+if cfg.interpretation.permutation_importance.models.logistic_regression:
+    pimp(train_val_sets, model_name="Logistic Regression")
 
 # %%
-y_dt = dt.predict(X_val_ft)
-print(classification_report(y_val, y_dt))
+if cfg.interpretation.permutation_importance.models.gaussian_nb:
+    pimp(train_val_sets, model_name="Gaussian NB")
 
 # %%
-y_ab = ab.predict(X_val_ft)
-print(classification_report(y_val, y_ab))
+if cfg.interpretation.permutation_importance.models.linear_svc:
+    pimp(train_val_sets, model_name="Linear SVC")
 
 # %%
-y_rf = rf.predict(X_val_ft)
-print(classification_report(y_val, y_rf))
+if cfg.interpretation.permutation_importance.models.decision_tree:
+    pimp(train_val_sets, model_name="Decision Tree")
 
 # %%
-y_xgb = xgb.predict(X_val_ft)
-print(classification_report(y_val, y_xgb))
+if cfg.interpretation.permutation_importance.models.random_forest:
+    pimp(train_val_sets, model_name="Random Forest")
 
 # %%
-y_lgb = lgb.predict(X_val_ft)
-print(classification_report(y_val, y_lgb))
+if cfg.interpretation.permutation_importance.models.adaboost:
+    pimp(train_val_sets, model_name="AdaBoost")
 
 # %%
-y_catb = catb.predict(X_val_ft)
-print(classification_report(y_val, y_catb))
+if cfg.interpretation.permutation_importance.models.xgboost:
+    pimp(train_val_sets, model_name="XGBoost")
+
+# %%
+if cfg.interpretation.permutation_importance.models.lightgbm:
+    pimp(train_val_sets, model_name="LightGBM")
+
+# %%
+if cfg.interpretation.permutation_importance.models.catboost:
+    pimp(train_val_sets, model_name="CatBoost")
+
+# %% [markdown]
+# ### Partial Dependence Plot
+
+# %%
+if cfg.interpretation.partial_dependence.models.knn:
+    pdp(cfg, train_val_sets, model_name="KNN")
+
+# %%
+if cfg.interpretation.partial_dependence.models.logistic_regression:
+    pdp(cfg, train_val_sets, model_name="Logistic Regression")
+
+# %%
+if cfg.interpretation.partial_dependence.models.gaussian_nb:
+    pdp(cfg, train_val_sets, model_name="Gaussian NB")
+
+# %%
+if cfg.interpretation.partial_dependence.models.linear_svc:
+    pdp(cfg, train_val_sets, model_name="Linear SVC")
+
+# %%
+if cfg.interpretation.partial_dependence.models.decision_tree:
+    pdp(cfg, train_val_sets, model_name="Decision Tree")
+
+# %%
+if cfg.interpretation.partial_dependence.models.random_forest:
+    pdp(cfg, train_val_sets, model_name="Random Forest")
+
+# %%
+if cfg.interpretation.partial_dependence.models.adaboost:
+    pdp(cfg, train_val_sets, model_name="AdaBoost")
+
+# %%
+if cfg.interpretation.partial_dependence.models.xgboost:
+    pdp(cfg, train_val_sets, model_name="XGBoost")
+
+# %%
+if cfg.interpretation.partial_dependence.models.lightgbm:
+    pdp(cfg, train_val_sets, model_name="LightGBM")
+
+# %%
+if cfg.interpretation.partial_dependence.models.catboost:
+    pdp(cfg, train_val_sets, model_name="CatBoost")
 
 # %%
