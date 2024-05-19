@@ -26,7 +26,7 @@ from crunchy_mining.pipeline import validate_logistic_regression
 from crunchy_mining.pipeline import validate_random_forest
 from crunchy_mining.pipeline import validate_xgboost
 from crunchy_mining.preprocessing.preprocessors import PreprocessorV1
-from crunchy_mining.preprocessing.preprocessors import PreprocessorV2
+from crunchy_mining.preprocessing.preprocessors import PreprocessorV2D
 from crunchy_mining.preprocessing.preprocessors import PreprocessorV3
 from crunchy_mining.preprocessing.preprocessors import PreprocessorV4
 from crunchy_mining.preprocessing.preprocessors import PreprocessorV5
@@ -114,7 +114,7 @@ match cfg.preprocessing.variant:
     case 1:
         preprocessor = PreprocessorV1(cfg)
     case 2:
-        preprocessor = PreprocessorV2(cfg)
+        preprocessor = PreprocessorV2D(cfg)
     case 3:
         preprocessor = PreprocessorV3(cfg)
     case 4:
