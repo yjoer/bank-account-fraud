@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 experiments_clf = [
     # "sampling_v1",
     # "sampling_v2",
+    # "sampling_v3",
+    # "sampling_v4",
+    # "sampling_v5",
+    # "sampling_v6",
     # "preprocessing_v1",
     # "preprocessing_v2",
     # "preprocessing_v3",

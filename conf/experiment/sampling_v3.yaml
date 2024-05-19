@@ -3,10 +3,10 @@ defaults:
   - _default
 
 mlflow:
-  experiment_name: clf/sampling_v2
+  experiment_name: clf/sampling_v3
 sampling:
   variant: 2
-  negative_downsampling_factor: 1
+  negative_downsampling_factor: 3
 preprocessing:
   variant: 3
 resampling:

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from crunchy_mining.pipeline import inspect_cv_split_size
 from crunchy_mining.pipeline import inspect_holdout_split_size
+from crunchy_mining.pipeline import intrinsic_calibrated_svc
 from crunchy_mining.pipeline import intrinsic_catboost
 from crunchy_mining.pipeline import intrinsic_lightgbm
 from crunchy_mining.pipeline import intrinsic_linear
@@ -219,7 +220,7 @@ if cfg.interpretation.intrinsic.models.logistic_regression:
 
 # %%
 if cfg.interpretation.intrinsic.models.linear_svc:
-    intrinsic_linear(cfg, train_val_sets, model_name="Linear SVC")
+    intrinsic_calibrated_svc(cfg, train_val_sets)
 
 # %%
 if cfg.interpretation.intrinsic.models.decision_tree:
