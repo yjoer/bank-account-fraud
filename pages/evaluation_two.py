@@ -11,6 +11,8 @@ from mlflow import MlflowClient
 from pages.fragments import create_experiment_model_selector
 from pages.fragments import create_experiment_selector
 from pages.fragments import create_fold_selector
+from pages.fragments import plot_mean_roc_curve
+from pages.fragments import plot_roc_curve
 
 st.set_page_config(layout="wide")
 mlflow.set_tracking_uri("http://localhost:5002")
@@ -69,6 +71,10 @@ with tabs[1]:
     cols[0].markdown("**Classification Report**")
     cols[0].table(tabulate_classification_report(val_metrics))
 
+    artifact_uri = f"runs:/{validation_run.run_id[0]}/roc.json"
+    roc = mlflow.artifacts.load_dict(artifact_uri)
+    cols[0].altair_chart(plot_roc_curve(roc), use_container_width=True, theme=None)
+
     cols[0].markdown("**Resource Usage**")
     cols[0].table(tabulate_resource_usage(val_metrics))
 
@@ -83,6 +89,18 @@ with tabs[1]:
 
     cols[0].markdown("**Classification Report**")
     cols[0].table(tabulate_classification_report(cv_metrics))
+
+    rocs = []
+    for run in cv_runs.itertuples():
+        artifact_uri = f"runs:/{run.run_id}/roc.json"
+        roc = mlflow.artifacts.load_dict(artifact_uri)
+        rocs.append(roc)
+
+    cols[0].altair_chart(
+        plot_mean_roc_curve(rocs),
+        use_container_width=True,
+        theme=None,
+    )
 
     cols[0].markdown("**Resource Usage**")
     cols[0].table(tabulate_resource_usage(cv_metrics))
@@ -167,6 +185,10 @@ with tabs[2]:
 
     cols[0].markdown("**Classification Report**")
     cols[0].table(tabulate_classification_report(metrics))
+
+    artifact_uri = f"runs:/{run_id}/roc.json"
+    roc = mlflow.artifacts.load_dict(artifact_uri)
+    cols[0].altair_chart(plot_roc_curve(roc), use_container_width=True, theme=None)
 
     cols[0].markdown("**Resource Usage**")
     cols[0].table(tabulate_resource_usage(metrics))

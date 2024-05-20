@@ -213,3 +213,99 @@ def plot_recall_score_by_experiments(df_cv_metrics: pd.DataFrame):
         use_container_width=True,
         theme=None,
     )
+
+
+def plot_roc_curve(roc: dict):
+    df = pd.DataFrame(roc)
+
+    df_diagonal = pd.DataFrame(
+        {
+            "false_positive_rates": [0, 1],
+            "true_positive_rates": [0, 1],
+        }
+    )
+
+    hover = alt.selection_single(
+        on="mouseover",
+        nearest=True,
+        fields=["false_positive_rates"],
+        empty=False,
+    )
+
+    roc_curve = (
+        alt.Chart(
+            data=df,
+            title=alt.TitleParams(
+                text="ROC Curve",
+                anchor="start",
+            ),
+        )
+        .mark_line()
+        .encode(
+            x=alt.X("false_positive_rates:Q", title="False Positive Rate"),
+            y=alt.Y("true_positive_rates:Q", title="True Positive Rate"),
+        )
+    )
+
+    hover_points = (
+        roc_curve.mark_point()
+        .encode(
+            opacity=alt.condition(hover, alt.value(1), alt.value(0)),
+            tooltip=[
+                alt.Tooltip("false_positive_rates", title="False Positive Rate"),
+                alt.Tooltip("true_positive_rates", title="True Positive Rate"),
+                alt.Tooltip("thresholds", title="Threshold"),
+            ],
+        )
+        .add_selection(hover)
+    )
+
+    diagonal_line = (
+        alt.Chart(df_diagonal)
+        .mark_line(strokeDash=[5, 5], color="black")
+        .encode(x="false_positive_rates:Q", y="true_positive_rates:Q")
+    )
+
+    return roc_curve + hover_points + diagonal_line
+
+
+# https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc_crossval.html
+def plot_mean_roc_curve(rocs: list[dict]):
+    tprs = []
+    thresholds = []
+    fpr_mean = np.linspace(0, 1, 100)
+
+    for roc in rocs:
+        tpr = np.interp(fpr_mean, roc["false_positive_rates"], roc["true_positive_rates"])  # fmt: skip
+        tpr[0] = 0.0
+        tprs.append(tpr)
+
+        threshold = np.interp(fpr_mean, roc["false_positive_rates"], roc["thresholds"])
+        thresholds.append(threshold)
+
+    tpr_mean = np.mean(tprs, axis=0)
+    tpr_mean[-1] = 1.0
+    tpr_std = np.std(tprs, axis=0)
+
+    threshold_mean = np.mean(thresholds, axis=0)
+
+    roc_mean = {
+        "true_positive_rates": tpr_mean,
+        "false_positive_rates": fpr_mean,
+        "thresholds": threshold_mean,
+        "true_positive_rates_std": tpr_std,
+    }
+
+    chart = plot_roc_curve(roc_mean)
+
+    band = (
+        alt.Chart(pd.DataFrame(roc_mean))
+        .mark_errorband()
+        .encode(
+            x=alt.X("false_positive_rates:Q", title="False Positive Rate"),
+            y=alt.Y("true_positive_rates:Q", title="True Positive Rate"),
+            yError=alt.YError("true_positive_rates_std:Q"),
+        )
+    )
+
+    return chart + band
