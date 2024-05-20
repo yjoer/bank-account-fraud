@@ -17,8 +17,8 @@ model = create_model_selector()
 
 with st.spinner("Fetching experiment data..."):
     df_cv_metrics = get_cv_metrics_by_model(task, model)
-    df_cv_metrics["experiment_id"] = df_cv_metrics["experiment_id"].astype(int)
-    df_cv_metrics.sort_values(by="experiment_id", inplace=True)
+    df_cv_metrics["experiment_id_first"] = df_cv_metrics["experiment_id_first"].astype(int)  # fmt: skip
+    df_cv_metrics.sort_values(by="experiment_id_first", inplace=True)
     df_cv_metrics["experiment_idx"] = np.arange(1, len(df_cv_metrics) + 1)
 
 plot_recall_score_by_experiments(df_cv_metrics)
