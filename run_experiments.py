@@ -31,6 +31,7 @@ experiments_clf = [
     # "resampling_v7",
     # "resampling_v8",
     # "feature_selection_v1",
+    # "feature_selection_v2",
 ]
 
 
