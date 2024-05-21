@@ -33,7 +33,9 @@ dev-dependencies = [
 
 [tool.rye.scripts]
 start-mlflow = 'mlflow server --backend-store-uri sqlite:///.mlflow/mlflow.db --default-artifact-root=.mlflow/mlruns --host 0.0.0.0 --port 5002'
+start-mlflow-auth = { cmd = 'mlflow server --app-name basic-auth --backend-store-uri sqlite:///.mlflow/mlflow.db --default-artifact-root=.mlflow/mlruns --host 0.0.0.0 --port 5002', env = { MLFLOW_AUTH_CONFIG_PATH = ".mlflow/basic_auth.ini" } }
 clean-mlflow = 'mlflow gc --backend-store-uri sqlite:///.mlflow/mlflow.db'
+start-streamlit = 'streamlit run app.py --server.port 8502'
 
 [tool.ruff.lint.isort]
 force-single-line = true

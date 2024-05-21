@@ -27,6 +27,8 @@ experiments = [
     "clf/resampling_v6",
     "clf/resampling_v7",
     "clf/resampling_v8",
+    "clf/feature_selection_v1",
+    "clf/feature_selection_v2",
 ]
 
 model_names = [
