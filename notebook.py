@@ -15,6 +15,16 @@ from crunchy_mining.pipeline import intrinsic_trees
 from crunchy_mining.pipeline import intrinsic_xgboost
 from crunchy_mining.pipeline import pdp
 from crunchy_mining.pipeline import pimp
+from crunchy_mining.pipeline import tune_adaboost
+from crunchy_mining.pipeline import tune_catboost
+from crunchy_mining.pipeline import tune_decision_tree
+from crunchy_mining.pipeline import tune_gaussian_nb
+from crunchy_mining.pipeline import tune_knn
+from crunchy_mining.pipeline import tune_lightgbm
+from crunchy_mining.pipeline import tune_linear_svc
+from crunchy_mining.pipeline import tune_logistic_regression
+from crunchy_mining.pipeline import tune_random_forest
+from crunchy_mining.pipeline import tune_xgboost
 from crunchy_mining.pipeline import validate_adaboost
 from crunchy_mining.pipeline import validate_catboost
 from crunchy_mining.pipeline import validate_decision_tree
@@ -43,8 +53,11 @@ from crunchy_mining.sampling.samplers import ResamplerV7
 from crunchy_mining.sampling.samplers import ResamplerV8
 from crunchy_mining.sampling.samplers import SamplerV1
 from crunchy_mining.sampling.samplers import SamplerV2
+from dotenv import load_dotenv
 from hydra import compose
 from hydra import initialize
+
+load_dotenv()
 
 # %load_ext autoreload
 # %autoreload 2
@@ -207,6 +220,49 @@ if cfg.validation.models.lightgbm:
 # %%
 if cfg.validation.models.catboost:
     validate_catboost(cfg, train_val_sets)
+
+# %% [markdown]
+# ### Hyperparameter Tuning
+
+# %%
+if cfg.tuning.models.knn:
+    tune_knn(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.logistic_regression:
+    tune_logistic_regression(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.gaussian_nb:
+    tune_gaussian_nb(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.linear_svc:
+    tune_linear_svc(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.decision_tree:
+    tune_decision_tree(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.random_forest:
+    tune_random_forest(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.adaboost:
+    tune_adaboost(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.xgboost:
+    tune_xgboost(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.lightgbm:
+    tune_lightgbm(cfg, train_val_sets)
+
+# %%
+if cfg.tuning.models.catboost:
+    tune_catboost(cfg, train_val_sets)
 
 # %% [markdown]
 # ## Assess

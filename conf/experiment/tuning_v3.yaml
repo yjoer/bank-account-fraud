@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_tuning/tuning_v3
+sampling:
+  variant: 1
+preprocessing:
+  variant: 7
+resampling:
+  variant: 4
+tuning:
+  models:
+    gaussian_nb: true

@@ -59,6 +59,22 @@ validation:
     xgboost: false
     lightgbm: false
     catboost: false
+tuning:
+  metrics:
+    memory_usage:
+      legacy: false
+    fixed_fpr: 0.05
+  models:
+    knn: false
+    logistic_regression: false
+    gaussian_nb: false
+    linear_svc: false
+    decision_tree: false
+    random_forest: false
+    adaboost: false
+    xgboost: false
+    lightgbm: false
+    catboost: false
 interpretation:
   intrinsic:
     models:

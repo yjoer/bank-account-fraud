@@ -32,6 +32,16 @@ experiments_clf = [
     # "resampling_v8",
     # "feature_selection_v1",
     # "feature_selection_v2",
+    # "tuning_v1",
+    # "tuning_v2",
+    # "tuning_v3",
+    # "tuning_v4",
+    # "tuning_v5",
+    # "tuning_v6",
+    # "tuning_v7",
+    # "tuning_v8",
+    # "tuning_v9",
+    # "tuning_v10",
 ]
 
 
