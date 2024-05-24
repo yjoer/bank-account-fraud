@@ -265,6 +265,49 @@ if cfg.tuning.models.catboost:
     tune_catboost(cfg, train_val_sets)
 
 # %% [markdown]
+# ### Retrain
+
+# %%
+if cfg.retrain.knn.enable:
+    validate_knn(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.logistic_regression.enable:
+    validate_logistic_regression(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.gaussian_nb.enable:
+    validate_gaussian_nb(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.linear_svc.enable:
+    validate_linear_svc(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.decision_tree.enable:
+    validate_decision_tree(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.random_forest.enable:
+    validate_random_forest(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.adaboost.enable:
+    validate_adaboost(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.xgboost.enable:
+    validate_xgboost(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.lightgbm.enable:
+    validate_lightgbm(cfg, train_val_sets, retrain=True)
+
+# %%
+if cfg.retrain.catboost.enable:
+    validate_catboost(cfg, train_val_sets, retrain=True)
+
+# %% [markdown]
 # ## Assess
 
 # %% [markdown]

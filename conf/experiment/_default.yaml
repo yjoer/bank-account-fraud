@@ -75,6 +75,37 @@ tuning:
     xgboost: false
     lightgbm: false
     catboost: false
+retrain:
+  knn:
+    enable: false
+    parameters: null
+  logistic_regression:
+    enable: false
+    parameters: null
+  gaussian_nb:
+    enable: false
+    parameters: null
+  linear_svc:
+    enable: false
+    parameters: null
+  decision_tree:
+    enable: false
+    parameters: null
+  random_forest:
+    enable: false
+    parameters: null
+  adaboost:
+    enable: false
+    parameters: null
+  xgboost:
+    enable: false
+    parameters: null
+  lightgbm:
+    enable: false
+    parameters: null
+  catboost:
+    enable: false
+    parameters: null
 interpretation:
   intrinsic:
     models:
