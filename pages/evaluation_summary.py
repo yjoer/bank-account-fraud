@@ -11,7 +11,7 @@ st.set_page_config(layout="wide")
 mlflow.set_tracking_uri("http://localhost:5002")
 
 with st.spinner("Fetching experiment data..."):
-    df = mlflow_util.get_cv_metrics_by_task(task_name="clf")
+    df = mlflow_util.get_cv_metrics_by_task(task_name="clf/")
 
 outputs = summarize_classification(df)
 outputs_res = summarize_resource(df)

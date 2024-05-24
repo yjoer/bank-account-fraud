@@ -12,7 +12,7 @@ from pages.fragments import plot_recall_score_by_experiments
 st.set_page_config(layout="wide")
 mlflow.set_tracking_uri("http://localhost:5002")
 
-task = "clf"
+task = "clf/"
 model = create_model_selector()
 
 with st.spinner("Fetching experiment data..."):
