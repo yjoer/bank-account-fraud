@@ -1,9 +1,11 @@
 __pycache__/
 .ipynb_checkpoints/
+.terraform/
 .venv/
 catboost_info/
 
 .env
+*.backup
 *.lock
 data/*.npz
 data/Base.csv

@@ -31,3 +31,6 @@ interpretation:
   partial_dependence:
     models:
       lightgbm: true
+  shap:
+    models:
+      lightgbm: true

@@ -143,3 +143,15 @@ interpretation:
       xgboost: false
       lightgbm: false
       catboost: false
+  shap:
+    models:
+      knn: false
+      logistic_regression: false
+      gaussian_nb: false
+      linear_svc: false
+      decision_tree: false
+      random_forest: false
+      adaboost: false
+      xgboost: false
+      lightgbm: false
+      catboost: false
