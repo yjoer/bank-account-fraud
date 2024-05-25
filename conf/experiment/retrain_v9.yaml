@@ -1,0 +1,33 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v9
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 3
+resampling:
+  variant: 0
+retrain:
+  lightgbm:
+    enable: true
+    parameters:
+      learning_rate: 0.2
+      num_leaves: 8
+      max_depth: 9
+      subsample: 1
+      colsample_bytree: 1
+      is_unbalance: true
+interpretation:
+  intrinsic:
+    models:
+      lightgbm: true
+  permutation_importance:
+    models:
+      lightgbm: true
+  partial_dependence:
+    models:
+      lightgbm: true

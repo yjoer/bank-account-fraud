@@ -42,6 +42,12 @@ experiments_clf = [
     # "tuning_v8",
     # "tuning_v9",
     # "tuning_v10",
+    # "retrain_v1",
+    # "retrain_v2",
+    # "retrain_v3",
+    # "retrain_v5",
+    # "retrain_v6",
+    # "retrain_v7",
 ]
 
 

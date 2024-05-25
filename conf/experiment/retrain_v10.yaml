@@ -1,0 +1,29 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v10
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 7
+resampling:
+  variant: 0
+retrain:
+  catboost:
+    enable: true
+    parameters:
+      learning_rate: 0.03
+      depth: 3
+interpretation:
+  intrinsic:
+    models:
+      catboost: true
+  permutation_importance:
+    models:
+      catboost: true
+  partial_dependence:
+    models:
+      catboost: true

@@ -29,7 +29,30 @@ experiments = [
     "clf/resampling_v8",
     "clf/feature_selection_v1",
     "clf/feature_selection_v2",
+    "clf_retrain/retrain_v1",
+    "clf_retrain/retrain_v2",
+    "clf_retrain/retrain_v3",
+    "clf_retrain/retrain_v4",
+    "clf_retrain/retrain_v5",
+    "clf_retrain/retrain_v6",
+    "clf_retrain/retrain_v7",
+    "clf_retrain/retrain_v8",
+    "clf_retrain/retrain_v9",
+    "clf_retrain/retrain_v10",
 ]
+
+experiment_model_options = {
+    "clf_retrain/retrain_v1": ["KNN"],
+    "clf_retrain/retrain_v2": ["Logistic Regression"],
+    "clf_retrain/retrain_v3": ["Gaussian NB"],
+    "clf_retrain/retrain_v4": ["Linear SVC"],
+    "clf_retrain/retrain_v5": ["Decision Tree"],
+    "clf_retrain/retrain_v6": ["Random Forest"],
+    "clf_retrain/retrain_v7": ["AdaBoost"],
+    "clf_retrain/retrain_v8": ["XGBoost"],
+    "clf_retrain/retrain_v9": ["LightGBM"],
+    "clf_retrain/retrain_v10": ["CatBoost"],
+}
 
 model_names = [
     "KNN",
@@ -81,7 +104,15 @@ def create_fold_selector():
     cols = st.columns([1, 1, 1])
     experiment = cols[0].selectbox(label="Experiments", options=experiments, key=3)
 
-    model = cols[1].selectbox(label="Models", options=model_names, key=4)
+    # Restrict the model options based on the experiment.
+    if experiment in experiment_model_options.keys():
+        model = cols[1].selectbox(
+            label="Models",
+            options=experiment_model_options[experiment],
+            key=4,
+        )
+    else:
+        model = cols[1].selectbox(label="Models", options=model_names, key=4)
 
     fold = cols[2].selectbox(
         label="Folds",

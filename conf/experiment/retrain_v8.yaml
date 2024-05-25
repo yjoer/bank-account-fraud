@@ -1,0 +1,33 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v8
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 7
+resampling:
+  variant: 0
+retrain:
+  xgboost:
+    enable: true
+    parameters:
+      learning_rate: 0.2
+      min_split_loss: 5
+      max_depth: 3
+      min_child_weight: 1
+      subsample: 1
+      colsample_bytree: 0.5
+interpretation:
+  intrinsic:
+    models:
+      xgboost: true
+  permutation_importance:
+    models:
+      xgboost: true
+  partial_dependence:
+    models:
+      xgboost: true

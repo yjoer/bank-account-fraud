@@ -1,0 +1,34 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v5
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 7
+resampling:
+  variant: 0
+retrain:
+  decision_tree:
+    enable: true
+    parameters:
+      criterion: gini
+      max_depth: null
+      min_samples_split: 32
+      min_samples_leaf: 10
+      max_features: null
+      max_leaf_nodes: 100
+      class_weight: null
+interpretation:
+  intrinsic:
+    models:
+      decision_tree: true
+  permutation_importance:
+    models:
+      decision_tree: true
+  partial_dependence:
+    models:
+      decision_tree: true

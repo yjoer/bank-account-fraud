@@ -1,0 +1,32 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v4
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 5
+resampling:
+  variant: 0
+retrain:
+  linear_svc:
+    enable: true
+    parameters:
+      method: sigmoid
+      estimator__penalty: l2
+      estimator__loss: hinge
+      estimator__C: 10.0
+      estimator__class_weight: null
+interpretation:
+  intrinsic:
+    models:
+      linear_svc: true
+  permutation_importance:
+    models:
+      linear_svc: true
+  partial_dependence:
+    models:
+      linear_svc: true

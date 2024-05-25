@@ -1,0 +1,34 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v2
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 7
+resampling:
+  variant: 0
+retrain:
+  logistic_regression:
+    enable: true
+    # The default parameter is the best.
+    parameters:
+      penalty: l2
+      C: 1.0
+      class_weight: null
+      solver: lbfgs
+      max_iter: 100
+      l1_ratio: null
+interpretation:
+  intrinsic:
+    models:
+      logistic_regression: true
+  permutation_importance:
+    models:
+      logistic_regression: true
+  partial_dependence:
+    models:
+      logistic_regression: true

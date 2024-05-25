@@ -1,0 +1,24 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v3
+sampling:
+  variant: 1
+preprocessing:
+  variant: 7
+resampling:
+  variant: 4
+retrain:
+  gaussian_nb:
+    enable: true
+    parameters:
+      var_smoothing: 1
+interpretation:
+  permutation_importance:
+    models:
+      gaussian_nb: true
+  partial_dependence:
+    models:
+      gaussian_nb: true

@@ -1,0 +1,20 @@
+# @package _global_
+defaults:
+  - _default
+
+mlflow:
+  experiment_name: clf_retrain/retrain_v1
+sampling:
+  variant: 2
+  negative_downsampling_factor: 5
+preprocessing:
+  variant: 6
+resampling:
+  variant: 0
+retrain:
+  knn:
+    enable: true
+    parameters:
+      n_neighbors: 9
+      weights: distance
+      p: 1
