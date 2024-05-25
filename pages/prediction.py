@@ -1,6 +1,8 @@
 import hydra
+import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+import shap
 import streamlit as st
 from crunchy_mining import mlflow_util
 from crunchy_mining.preprocessing.preprocessors import PreprocessorV3
@@ -173,3 +175,22 @@ if y == 0:
     st.success("Not Fraud")
 elif y == 1:
     st.error("Fraud")
+
+
+@st.cache_resource(show_spinner="Loading explainer...")
+def load_shap_explainer():
+    artifact_uri = f"runs:/{run_id}/shap.pkl"
+    explainer: shap.TreeExplainer = mlflow_util.load_pickle(artifact_uri)
+
+    return explainer
+
+
+if model_name == "LightGBM":
+    explainer = load_shap_explainer()
+    explanation = explainer(v_ft_pp)
+
+    fig = plt.figure()
+    ax = shap.plots.waterfall(explanation[0], max_display=50, show=False)
+    fig.add_axes(ax)
+
+    st.pyplot(fig)

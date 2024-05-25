@@ -15,6 +15,7 @@ from crunchy_mining.pipeline import intrinsic_trees
 from crunchy_mining.pipeline import intrinsic_xgboost
 from crunchy_mining.pipeline import pdp
 from crunchy_mining.pipeline import pimp
+from crunchy_mining.pipeline import shap_explainer
 from crunchy_mining.pipeline import tune_adaboost
 from crunchy_mining.pipeline import tune_catboost
 from crunchy_mining.pipeline import tune_decision_tree
@@ -430,5 +431,12 @@ if cfg.interpretation.partial_dependence.models.lightgbm:
 # %%
 if cfg.interpretation.partial_dependence.models.catboost:
     pdp(cfg, train_val_sets, model_name="CatBoost")
+
+# %% [markdown]
+# ### SHAP
+
+# %%
+if cfg.interpretation.shap.models.lightgbm:
+    shap_explainer(cfg, train_val_sets, model_name="LightGBM")
 
 # %%
