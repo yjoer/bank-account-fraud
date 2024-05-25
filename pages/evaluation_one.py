@@ -1,4 +1,3 @@
-import mlflow
 import numpy as np
 import streamlit as st
 from crunchy_mining.mlflow_util import get_cv_metrics_by_model
@@ -10,7 +9,6 @@ from pages.fragments import create_model_selector
 from pages.fragments import plot_recall_score_by_experiments
 
 st.set_page_config(layout="wide")
-mlflow.set_tracking_uri("http://localhost:5002")
 
 task = "clf/"
 model = create_model_selector()

@@ -15,7 +15,6 @@ from pages.fragments import plot_mean_roc_curve
 from pages.fragments import plot_roc_curve
 
 st.set_page_config(layout="wide")
-mlflow.set_tracking_uri("http://localhost:5002")
 
 tabs = st.tabs(["Experiments", "Model-Specific", "Fold-Specific"])
 

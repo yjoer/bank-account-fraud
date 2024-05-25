@@ -1,4 +1,3 @@
-import mlflow
 import streamlit as st
 from crunchy_mining import mlflow_util
 from crunchy_mining.util import summarize_classification
@@ -8,7 +7,6 @@ from pages.fragments import plot_best_by_recall_score
 from pages.fragments import plot_worst_by_recall_score
 
 st.set_page_config(layout="wide")
-mlflow.set_tracking_uri("http://localhost:5002")
 
 with st.spinner("Fetching experiment data..."):
     df = mlflow_util.get_cv_metrics_by_task(task_name="clf/")

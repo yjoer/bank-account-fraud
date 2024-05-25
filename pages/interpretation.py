@@ -10,7 +10,6 @@ from hydra import initialize
 from pages.fragments import create_fold_selector
 
 st.set_page_config(layout="wide")
-mlflow.set_tracking_uri("http://localhost:5002")
 
 experiment, model, fold = create_fold_selector()
 
