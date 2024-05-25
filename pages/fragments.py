@@ -68,6 +68,7 @@ model_names = [
 ]
 
 folds = {
+    "testing": "Testing",
     "validation": "Validation",
     "fold_1": "Fold 1",
     "fold_2": "Fold 2",

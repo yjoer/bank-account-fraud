@@ -1,3 +1,4 @@
+import hydra
 import mlflow
 import numpy as np
 import streamlit as st
@@ -32,6 +33,9 @@ model_experiment_map = {
 
 experiment = model_experiment_map[model_name]
 _, experiment_file = experiment.split("/")[:2]
+
+# Allow fast consecutive re-runs without crashing the app.
+hydra.core.global_hydra.GlobalHydra.instance().clear()
 
 with initialize(version_base=None, config_path="../conf"):
     cfg = compose(overrides=[f"+experiment={experiment_file}"])
