@@ -18,7 +18,7 @@ from pages.fragments import create_model_selector
 st.set_page_config(layout="wide")
 
 st.markdown("**1. Select a Model**")
-model_name = create_model_selector()
+model_name = create_model_selector(index=8)
 
 model_experiment_map = {
     "KNN": "clf_retrain/retrain_v1",

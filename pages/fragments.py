@@ -78,14 +78,14 @@ folds = {
 }
 
 
-def model_selector(model_names):
+def model_selector(model_names, **kwargs):
     cols = st.columns([1, 1, 1])
 
-    return cols[0].selectbox(label="Models", options=model_names)
+    return cols[0].selectbox(label="Models", options=model_names, **kwargs)
 
 
-def create_model_selector():
-    return model_selector(model_names)
+def create_model_selector(**kwargs):
+    return model_selector(model_names, **kwargs)
 
 
 def create_experiment_selector():
