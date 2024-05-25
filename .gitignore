@@ -7,5 +7,6 @@ catboost_info/
 .env
 *.backup
 *.lock
+*.pem
 data/*.npz
 data/Base.csv

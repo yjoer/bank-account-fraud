@@ -1,0 +1,73 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Update the apt package index and install packages to allow apt to use a repository over HTTPS.
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        update_cache: yes
+        state: present
+
+    - name: Add Docker's official GPG key.
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/trusted.gpg.d/docker.asc
+        force: true
+
+    - name: Retrieve the architecture.
+      command: dpkg --print-architecture
+      register: arch
+
+    - name: Retrieve the name of your Ubuntu distribution.
+      command: lsb_release -cs
+      register: distribution_release
+
+    - name: Set variables for subsequent plays.
+      set_fact:
+        arch: "{{ arch.stdout }}"
+        distribution_release: "{{ distribution_release.stdout }}"
+
+    - name: Set up the stable repository.
+      apt_repository:
+        repo: deb [arch={{ arch }}] https://download.docker.com/linux/ubuntu {{ distribution_release }} stable
+        state: present
+
+    - name: Install the latest version of Docker Engine and containerd.
+      apt:
+        pkg:
+          - containerd.io
+          - docker-ce
+          - docker-ce-cli
+          - docker-compose-plugin
+        update_cache: yes
+        state: present
+
+    - name: Ensure Docker is running.
+      service:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Ensure containerd is running.
+      service:
+        name: containerd
+        enabled: yes
+        state: started
+
+    - name: Append the group 'docker' to the user's groups.
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+        state: present
+
+    - name: Prepare the node for multi-architecture builds.
+      apt:
+        pkg:
+          - binfmt-support
+          - qemu-user-static
+        update_cache: yes
+        state: present

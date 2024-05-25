@@ -1,0 +1,38 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Check for the existence of the swap file.
+      stat:
+        path: /swapfile
+        get_checksum: false
+      register: swap_file
+
+    - name: Stop the play if the swap file has been created.
+      meta: end_host
+      when: swap_file.stat.exists
+
+    - name: The swap file is 16 GB (128 MB x 128).
+      command: dd if=/dev/zero of=/swapfile bs=128M count=128
+
+    - name: Update the read and write permissions for the swap file.
+      file:
+        path: /swapfile
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Set up a Linux swap area.
+      command: mkswap /swapfile
+
+    - name: Make the swap file available for immediate use by adding the swap file to swap space.
+      command: swapon /swapfile
+
+    - name: Start the swap file at boot time by editing the /etc/fstab file.
+      mount:
+        name: none
+        src: /swapfile
+        fstype: swap
+        opts: sw
+        passno: 0
+        dump: 0
+        state: present
