@@ -1,10 +1,12 @@
+import os
+
 import mlflow
 from dotenv import load_dotenv
 from st_pages import Page
 from st_pages import show_pages
 
 load_dotenv()
-mlflow.set_tracking_uri("http://localhost:5002")
+mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI"))
 
 show_pages(
     [
