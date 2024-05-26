@@ -10,3 +10,10 @@ services:
       - 5002:5002
     volumes:
       - /home/ubuntu/.mlflow:/.mlflow
+  streamlit:
+    restart: always
+    image: yjoer/baf:latest
+    ports:
+      - 8502:8502
+    volumes:
+      - /home/ubuntu/.mlflow:/.mlflow
