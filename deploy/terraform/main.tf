@@ -32,4 +32,20 @@ resource "google_compute_instance" "baf" {
   metadata = {
     ssh-keys = "ubuntu:${file("./gce.pub")}"
   }
+
+  tags = ["mlflow-server", "streamlit-server"]
+}
+
+resource "google_compute_firewall" "baf-firewall" {
+  name    = "baf-firewall"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["5002", "8502"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+
+  target_tags   = ["mlflow-server", "streamlit-server"]
 }
